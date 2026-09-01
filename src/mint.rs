@@ -110,9 +110,7 @@ pub(crate) fn update_latest_period(e: &Env, user: &Address, period: u64) {
 ///   - `bridge_wrap_in`: emits `br_in` event and persists `InboundBridgeRecord`.
 /// - **Pre-Validation**: Callers handle authorization (`require_auth`), paused checks (`require_not_paused`), signature verification, and replay protection prior to calling `insert_wrap_record`.
 pub(crate) fn insert_wrap_record(e: &Env, user: &Address, period: u64, record: &WrapRecord) {
-    if e.storage().persistent().has(&DataKey::OptOut(user.clone())) {
-        panic_with_error!(e, ContractError::UserOptedOut);
-    }
+    crate::optout::require_not_opted_out(e, user);
 
     let wrap_key = DataKey::Wrap(user.clone(), period);
     if e.storage().persistent().has(&wrap_key) {
