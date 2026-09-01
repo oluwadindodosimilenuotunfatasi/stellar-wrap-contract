@@ -1,6 +1,7 @@
 use soroban_sdk::{panic_with_error, symbol_short, Address, Bytes, BytesN, Env, Symbol};
 
 use crate::{
+    optout,
     signature::verify_inbound_bridge_signature,
     storage_accounting,
     storage_types::{
@@ -222,7 +223,7 @@ pub(crate) fn bridge_wrap_in(
 
     // An opted-out recipient must never receive a bridged wrap, matching the
     // mint path guard.
-    crate::optout::require_not_opted_out(&e, &recipient);
+    optout::require_not_opted_out(&e, &recipient);
 
     if !is_chain_supported(&e, source_chain) {
         panic_with_error!(e, ContractError::ChainDisabled);
