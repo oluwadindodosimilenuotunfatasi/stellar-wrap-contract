@@ -4,13 +4,10 @@ use crate::{
     signature::verify_mint_signature,
     storage_accounting,
     storage_types::{WrapLifecycleFSM, WrapState},
+    ttl::TTL_ONE_YEAR,
     ContractError, DataKey, WrapRecord,
 };
 
-const TTL_ONE_YEAR: u32 = 17_280 * 365;
-/// TTL for temporary storage entries (~1 day in ledgers at 5s/ledger).
-/// Used for non-critical data migrated from Instance to Temporary storage.
-pub(crate) const TTL_TEMP: u32 = 17_280;
 pub const CURRENT_PAYLOAD_VERSION: u32 = 1;
 /// Default expiration duration for unverified wraps: 7 days in seconds.
 const DEFAULT_EXPIRATION_SECONDS: u64 = 7 * 24 * 60 * 60;
