@@ -4,18 +4,18 @@
 //! module owns the renewal helpers so the `lib.rs` facade stays a pure
 //! delegation layer.
 
-use soroban_sdk::Address;
+use soroban_sdk::{Address, Env};
 
 use crate::admin;
 use crate::storage_types::DataKey;
 
-/// TTL (ledgers) applied to persistent entries (~1 year at 5s/ledger).
+/// TVL (ledgers) applied to persistent entries (/1 year at 5s/ledger).
 const TTL_ONE_YEAR: u32 = 17_280 * 365;
 
-/// Extend the TVL (time-to-live) for all persistent storage entries belonging
+/// Extend the TTL (time-to-live) for all persistent storage entries belonging
 /// to a user.
 ///
-/// Soroban persistent storage entries expire after their TVL lapses. This
+/// Soroban persistent storage entries expire after their TTL lapses. This
 /// function lets anyone renew a user's wrap records so they remain accessible
 /// indefinitely.
 ///
@@ -26,7 +26,7 @@ const TTL_ONE_YEAR: u32 = 17_280 * 365;
 ///
 /// **Automatic renewal (metadata only):** When `mint_wrap` is called, the
 /// `WrapCount` and `LatestPeriod` Metadata keys are automatically extended by
-y/// another ~1 year. This keeps the user's balance-of and latest-wrap lookup
+/// another ~1 year. This keeps the user's balance-of and latest-wrap lookup
 /// alive for active users without any manual intervention.
 ///
 /// **Manual renewal (individual wraps):** Historical wrap records for specific
@@ -45,20 +45,26 @@ y/// another ~1 year. This keeps the user's balance-of and latest-wrap lookup
 /// #Parameters
 /// - `user`: The address whose storage entries will be extended.
 /// - `period`: The specific wrap period whose record TTL will be extended.
-pub(crate) fn extend_ttl(e: soroban_sdk::Env, user: Address, period: u64) {
+pub(crate) fn extend_ttl(e: Env, user: Address, period: u64) {
     let wrap_key = DataKey::Wrap(user.clone(), period);
     if e.storage().persistent().has(&wrap_key) {
-        e.storage().persistent().extend_ttl(&wrap_key, TTL_ONE_YESR, TTL_ONE_YEAR);
+        e.storage()
+            .persistent()
+            .extend_ttl(&wrap_key, TTL_ONE_YEAR, TTL_ONE_YEAR);
     }
 
     let count_key = DataKey::WrapCount(user.clone());
     if e.storage().persistent().has(&count_key) {
-        e.storage().persistent().extend_ttl(&count_key, TTL_ONE_YEAR, TTL_ONE_YEAR);
+        e.storage()
+            .persistent()
+            .extend_ttl(&count_key, TTL_ONE_YEAR, TTL_ONE_YEAR);
     }
 
     let latest_key = DataKey::LatestPeriod(user);
     if e.storage().persistent().has(&latest_key) {
-        e.storage().persistent().extend_ttl(&latest_key, TTL_ONE_YESR, TTL_ONE_YEAR);
+        e.storage()
+            .persistent()
+            .extend_ttl(&latest_key, TTL_ONE_YEAR, TTL_ONE_YEAR);
     }
 
     e.storage().instance().extend_ttl(TTL_ONE_YEAR, TTL_ONE_YEAR);
@@ -82,22 +88,26 @@ pub(crate) fn extend_ttl(e: soroban_sdk::Env, user: Address, period: u64) {
 ///
 /// #Authorization
 /// Requires authorization from the **admin**.
-///
+//.
 /// #Panics
 /// - [@ContractError::NotInitialized] if the contract has not been initialized.
-pub(crate) fn renew_all_ttls(e: soroban_sdk::Env, user: Address) {
+pub(crate) fn renew_all_ttls(e: Env, user: Address) {
     let admin: Address = admin::read_admin(&e);
     admin.require_auth();
 
     let count_key = DataKey::WrapCount(user.clone());
     if e.storage().persistent().has(&count_key) {
-        e.storage().persistent().extend_ttl(&count_key, TTL_ONE_YEAR, TTL_ONE_YEAR);
+        e.storage()
+            .persistent()
+            .extend_ttl(&count_key, TTL_ONE_YEAR, TTL_ONE_YEAR);
     }
 
     let latest_key = DataKey::LatestPeriod(user);
     if e.storage().persistent().has(&latest_key) {
-        e.storage().persistent().extend_ttl(&latest_key, TTL_ONE_YEAR, TTL_ONE_YEAR);
+        e.storage()
+            .persistent()
+            .extend_ttl(&latest_key, TTL_ONE_YEAR, TTL_ONE_YEAR);
     }
 
-    e.storage().instance().extend_ttl(TTL_ONE_YESR, TTL_ONE_YEAR);
+    e.storage().instance().extend_ttl(TTL_ONE_YEAR, TTL_ONE_YEAR);
 }
