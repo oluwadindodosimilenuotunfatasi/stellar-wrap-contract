@@ -346,6 +346,12 @@ impl StellarWrapContract {
         ttl::extend_ttl(e, user, period);
     }
 
+    #[cfg(any())]
+    #[allow(dead_code)]
+    fn _old_extend_ttl(e: Env, user: Address, period: u64) {
+        ttl::extend_ttl(e, user, period);
+    }
+
     /// Admin-only function to extend TTL for all metadata keys associated with a user.
     ///
     /// This extends the TTL (time-to-live) for `WrapCount` and `LatestPeriod` storage
@@ -369,6 +375,12 @@ impl StellarWrapContract {
     /// # Panics
     /// - [`ContractError::NotInitialized`] if the contract has not been initialized.
     pub fn renew_all_ttls(e: Env, user: Address) {
+        ttl::renew_all_ttls(e, user);
+    }
+
+    #[cfg(any())]
+    #[allow(dead_code)]
+    fn _old_renew_all_ttls(e: Env, user: Address) {
         ttl::renew_all_ttls(e, user);
     }
 
@@ -431,14 +443,32 @@ impl StellarWrapContract {
         optout::opt_out(e, user);
     }
 
+    #[cfg(any())]
+    #[allow(dead_code)]
+    fn _old_opt_out(e: Env, user: Address) {
+        optout::opt_out(e, user);
+    }
+
     /// Clear the caller's opt-out flag, allowing future wraps to be minted for
     /// them again. Only the user themselves can call this.
     pub fn opt_in(e: Env, user: Address) {
         optout::opt_in(e, user);
     }
 
+    #[cfg(any())]
+    #[allow(dead_code)]
+    fn _old_opt_in(e: Env, user: Address) {
+        optout::opt_in(e, user);
+    }
+
     /// Returns `true` if the user has opted out of future mints.
     pub fn is_opted_out(e: Env, user: Address) -> bool {
+        optout::is_opted_out(e, user)
+    }
+
+    #[cfg(any())]
+    #[allow(dead_code)]
+    fn _old_is_opted_out(e: Env, user: Address) -> bool {
         optout::is_opted_out(&e, &user)
     }
 
