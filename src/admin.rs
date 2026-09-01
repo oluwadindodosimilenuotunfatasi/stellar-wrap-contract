@@ -196,11 +196,7 @@ pub(crate) fn apply_upgrade(e: &Env, new_wasm_hash: BytesN<32>) {
 #[allow(deprecated)] // TODO(#718): migrate to #[contractevent]
 pub(crate) fn upgrade(e: Env, new_wasm_hash: BytesN<32>) {
     crate::timelock::require_direct_call_allowed(&e);
-    let current_admin: Address = e
-        .storage()
-        .instance()
-        .get(&DataKey::Admin)
-        .unwrap_or_else(|| panic_with_error!(e, ContractError::NotInitialized));
+    let current_admin = read_admin(&e);
 
     current_admin.require_auth();
 
@@ -211,11 +207,7 @@ pub(crate) fn upgrade(e: Env, new_wasm_hash: BytesN<32>) {
 /// immediately-acceptable proposal would otherwise bypass the delay.
 pub(crate) fn propose_admin(e: Env, new_admin: Address) {
     crate::timelock::require_direct_call_allowed(&e);
-    let current_admin: Address = e
-        .storage()
-        .instance()
-        .get(&DataKey::Admin)
-        .unwrap_or_else(|| panic_with_error!(e, ContractError::NotInitialized));
+    let current_admin = read_admin(&e);
 
     current_admin.require_auth();
 
@@ -233,11 +225,7 @@ pub(crate) fn propose_admin(e: Env, new_admin: Address) {
 /// `cancel_proposed_admin` and reschedule through the controller instead.
 pub(crate) fn accept_admin(e: Env) {
     crate::timelock::require_direct_call_allowed(&e);
-    let _: Address = e
-        .storage()
-        .instance()
-        .get(&DataKey::Admin)
-        .unwrap_or_else(|| panic_with_error!(e, ContractError::NotInitialized));
+    let _ = read_admin(&e);
 
     let pending_admin: Address = e
         .storage()
@@ -252,11 +240,7 @@ pub(crate) fn accept_admin(e: Env) {
 }
 
 pub(crate) fn cancel_proposed_admin(e: Env) {
-    let current_admin: Address = e
-        .storage()
-        .instance()
-        .get(&DataKey::Admin)
-        .unwrap_or_else(|| panic_with_error!(e, ContractError::NotInitialized));
+    let current_admin = read_admin(&e);
 
     current_admin.require_auth();
 
@@ -341,7 +325,7 @@ pub(crate) fn set_wrap_metadata(
     record.image_url = Some(image_url.clone());
 
     e.storage().persistent().set(&key, &record);
-    e.storage().persistent().extend_ttl(&key, TTL_TEMP, TTL_TEMP);
+    crate::ttl::extend_ttl(&e, &key, TTL_TEMP, TTL_TEMP);
 
     e.events().publish(
         (
