@@ -1,7 +1,6 @@
 use soroban_sdk::{panic_with_error, symbol_short, Address, Bytes, BytesN, Env, Symbol};
 
 use crate::{
-    optout,
     signature::verify_inbound_bridge_signature,
     storage_accounting,
     storage_types::{
@@ -205,8 +204,6 @@ pub(crate) fn bridge_wrap_refund(e: Env, outbound_nonce: u64) {
 
 /// Fulfill an inbound cross-chain token/wrap bridge transfer.
 /// Called by authorized relayer to process wraps coming from an external chain.
-///
-/// Reverts if the recipient is opted out.
 #[allow(deprecated)] // TODO(#718): migrate to #[contractevent]
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn bridge_wrap_in(
@@ -223,7 +220,7 @@ pub(crate) fn bridge_wrap_in(
 
     // An opted-out recipient must never receive a bridged wrap, matching the
     // mint path guard.
-    optout::require_not_opted_out(&e, &recipient);
+    crate::optout::require_not_opted_out(&e, &recipient);
 
     if !is_chain_supported(&e, source_chain) {
         panic_with_error!(e, ContractError::ChainDisabled);
