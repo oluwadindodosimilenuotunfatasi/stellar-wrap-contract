@@ -29,7 +29,7 @@ use soroban_sdk::{
     contract, contractimpl, Address, Bytes, BytesN, Env, String, Symbol, Vec,
 };
 
-pub(crate) mod admin;
+mod admin;
 mod alias;
 mod bridge;
 mod burn;
@@ -39,7 +39,7 @@ mod events;
 mod governance;
 mod merkle;
 mod mint;
-pub(crate) mod optout;
+mod optout;
 mod oracle;
 mod queries;
 mod revoke;
@@ -453,10 +453,12 @@ impl StellarWrapContract {
 
     pub fn revoke_wrap(e: Env, user: Address, period: u64, reason_hash: BytesN<32>) {
         revoke::revoke_wrap(e, user, period, reason_hash);
+        decrement_total_wrap_count(&e);
     }
 
     pub fn burn_wrap(e: Env, user: Address, period: u64) {
         burn::burn_wrap(e, user, period);
+        decrement_total_wrap_count(&e);
     }
 
     /// Returns the total number of wraps that have been revoked globally.
@@ -816,6 +818,10 @@ impl token::TokenInterface for StellarWrapContract {
     fn balance_of(e: Env, user: Address) -> i128 {
         queries::balance_of(e, user)
     }
+}
+
+fn decrement_total_wrap_count(e: &Env) {
+    storage_accounting::decrement_total_wrap_count(e);
 }
 
 #[cfg(test)]
