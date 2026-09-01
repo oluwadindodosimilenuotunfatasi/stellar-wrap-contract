@@ -29,7 +29,7 @@ use soroban_sdk::{
     contract, contractimpl, Address, Bytes, BytesN, Env, String, Symbol, Vec,
 };
 
-mod admin;
+pub(crate) mod admin;
 mod alias;
 mod bridge;
 mod burn;
@@ -39,7 +39,7 @@ mod events;
 mod governance;
 mod merkle;
 mod mint;
-mod optout;
+pub(crate) mod optout;
 mod oracle;
 mod queries;
 mod revoke;
