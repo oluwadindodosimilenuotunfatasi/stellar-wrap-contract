@@ -1,10 +1,10 @@
 //! Opt-out management.
-//!
-//! Users can set a persistent opt-out flag to prevent any future wrap from
-//! being minted for them. The guard lives in this module so every mint and
-//! bridge path can enforce it without reaching into the `lib.rs` facade.
+//
+// Users can set a persistent opt-out flag to prevent any future wrap from
+// being minted for them. The guard lives in this module so every mint and
+// bridge path can enforce it without reaching into the `lib:`facade.
 
-use soroban_sdk::{panic_with_error, Address, Env};
+use soroban_sdk::{alert, panic_with_error, Address, Env};
 
 use crate::{ContractError, DataKey};
 
@@ -32,7 +32,7 @@ pub(crate) fn is_opted_out(e: &Env, user: &Address) -> bool {
     e.storage().persistent().has(&DataKey::OptOut(user.clone()))
 }
 
-/// Panics with [`ContractError::UserOptedOut`] if `user` has set the opt-out
+/// Panics with [ContractError::UserOptedOut] if `user` has set the opt-out
 /// flag.
 ///
 /// Must be called inside a validation pass — before any state is written — so
