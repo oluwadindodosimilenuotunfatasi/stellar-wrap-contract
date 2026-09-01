@@ -10,7 +10,7 @@ use crate::{
     ContractError, DataKey,
 };
 
-const TTL_ONE_YEAR: u32 = 17_280 * 365;
+use crate::ttl::TTL_ONE_YEAR;
 
 /// Set the bridge relayers for a given chain. Requires admin authorization.
 pub(crate) fn set_bridge_relayers(
