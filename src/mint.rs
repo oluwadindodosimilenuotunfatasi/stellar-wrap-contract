@@ -2,6 +2,7 @@ use soroban_sdk::{panic_with_error, symbol_short, Address, BytesN, Env, Symbol};
 
 use crate::{
     optout,
+    optout,
     signature::verify_mint_signature,
     storage_accounting,
     storage_types::{WrapLifecycleFSM, WrapState},
@@ -91,6 +92,7 @@ pub(crate) fn update_latest_period(e: &Env, user: &Address, period: u64) {
 ///
 /// # Invariants and Index Maintenance
 /// - **Opt-out Validation**: Panics with `ContractError::UserOptedOut` if the user has opted out (`DataKey::OptOut`).
+/// - **Opt-out Validation**: Panics with `ContractError::UserOptedOut` if the user has opted out (`DataKey::OptOut`).
 /// - **Existence Check**: Panics with `ContractError::WrapAlreadyExists` if a record already exists at `DataKey::Wrap(user, period)`.
 /// - **Storage & TTL**: Writes `DataKey::Wrap(user, period)` and extends TTL (1 year).
 /// - **Storage Accounting**: Adds estimated storage bytes for the new wrap record (`estimate_wrap_bytes_new`).
@@ -108,6 +110,8 @@ pub(crate) fn update_latest_period(e: &Env, user: &Address, period: u64) {
 ///   - `bridge_wrap_in`: emits `br_in` event and persists `InboundBridgeRecord`.
 /// - **Pre-Validation**: Callers handle authorization (`require_auth`), paused checks (`require_not_paused`), signature verification, and replay protection prior to calling `insert_wrap_record`.
 pub(crate) fn insert_wrap_record(e: &Env, user: &Address, period: u64, record: &WrapRecord) {
+    optout::require_not_opted_out(e, user);
+
     optout::require_not_opted_out(e, user);
 
     let wrap_key = DataKey::Wrap(user.clone(), period);
